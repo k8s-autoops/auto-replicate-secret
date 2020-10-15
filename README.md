@@ -1,4 +1,4 @@
-# template-autoops-statefulset
+# auto-replicate-secret
 
 ## Usage
 
@@ -9,38 +9,41 @@ Create namespace `autoops` and apply yaml resources as described below.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
   namespace: autoops
 ---
 # create clusterrole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
 rules:
   - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["list"]
+    resources: ["namespaces"]
+    verbs: ["watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "create", "update", "delete"]
 ---
 # create clusterrolebinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
 subjects:
   - kind: ServiceAccount
-    name: template-autoops-statefulset
+    name: auto-replicate-secret
     namespace: autoops
 ---
 # create service
 apiVersion: v1
 kind: Service
 metadata:
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
   namespace: autoops
 spec:
   ports:
@@ -48,31 +51,37 @@ spec:
       name: answer
   clusterIP: None
   selector:
-    app: template-autoops-statefulset
+    app: auto-replicate-secret
 ---
 # create statefulset
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: template-autoops-statefulset
+  name: auto-replicate-secret
   namespace: autoops
 spec:
   selector:
     matchLabels:
-      k8s-app: template-autoops-statefulset
-  serviceName: template-autoops-statefulset
+      k8s-app: auto-replicate-secret
+  serviceName: auto-replicate-secret
   replicas: 1
   template:
     metadata:
       labels:
-        k8s-app: template-autoops-statefulset
+        k8s-app: auto-replicate-secret
     spec:
-      serviceAccount: template-autoops-statefulset
+      serviceAccount: auto-replicate-secret
       containers:
-        - name: template-autoops-statefulset
-          image: autoops/template-autoops-statefulset
+        - name: auto-replicate-secret
+          image: autoops/auto-replicate-secret
           imagePullPolicy: Always
 ```
+
+Add a `Secret` to namespace `autoops`
+
+Add annotation `autoops.auto-replicate-secret/enabled: "true"` if you want to replicate that secret to all namespaces
+
+Add annotation `autoops.auto-replicate-secret/overwrite: "true"` if you want to overwrite existing `Secret`
 
 ## Credits
 

@@ -2,8 +2,8 @@ FROM golang:1.14 AS builder
 ENV CGO_ENABLED 0
 WORKDIR /go/src/app
 ADD . .
-RUN go build -o /template-autoops-statefulset
+RUN go build -o /auto-replicate-secret
 
 FROM alpine:3.12
-COPY --from=builder /template-autoops-statefulset /template-autoops-statefulset
-CMD ["/template-autoops-statefulset"]
+COPY --from=builder /auto-replicate-secret /auto-replicate-secret
+CMD ["/auto-replicate-secret"]
