@@ -51,7 +51,7 @@ spec:
       name: answer
   clusterIP: None
   selector:
-    app: auto-replicate-secret
+    k8s-app: auto-replicate-secret
 ---
 # create statefulset
 apiVersion: apps/v1
